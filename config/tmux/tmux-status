@@ -1,0 +1,141 @@
+#!/bin/bash
+
+# Nord.
+TMUX_STATUS_BG=black
+TMUX_STATUS_LEFT_BG=cyan
+TMUX_STATUS_RIGHT_BG=blue
+TMUX_STATUS_WINDOW_BG=brightblack
+TMUX_STATUS_WINDOW_FG=white
+TMUX_STATUS_CURRENT_WINDOW_BG=cyan
+TMUX_STATUS_CURRENT_WINDOW_FG=black
+TMUX_STATUS_BELL_WINDOW_BG=brightblack
+TMUX_STATUS_BELL_WINDOW_FG=yellow
+TMUX_STATUS_SOFT_SEP_FG=white
+TMUX_SESSION_BG=blue
+TMUX_SESSION_FG=black
+
+# Symbols for copy&paste:
+# 
+
+LSEP=
+SOFT_LSEP=
+
+RSEP=
+SOFT_RSEP=
+
+SOFT_SEP="|"
+
+function tmux_condition() {
+  echo "#{?$1,$2,$3}"
+}
+
+# left_helper bg fg
+function left_helper() {
+  bg=$1
+  fg=$2
+  echo "#[bg=$bg]#[fg=$fg] #S #[fg=$bg]#[bg=$TMUX_STATUS_BG]$RSEP"
+}
+
+function left() {
+  tmux_condition client_prefix \
+    "$(left_helper $TMUX_STATUS_BG $TMUX_SESSION_FG)" \
+    "$(left_helper $TMUX_SESSION_BG $TMUX_SESSION_FG)"
+}
+
+# window_helper bg fg
+function window_helper() {
+  bb=$TMUX_STATUS_BG
+  b=$1
+  f=$2
+  echo "#[noreverse]#[fg=$bb]#[bg=$b]$RSEP#[fg=$f]#[bg=$b] #I#{?window_flags,#{window_flags}, } #W #[bg=$bb]#[fg=$b]$RSEP"
+}
+
+function current_window() {
+  window_helper $TMUX_STATUS_CURRENT_WINDOW_BG $TMUX_STATUS_CURRENT_WINDOW_FG
+}
+
+function window() {
+  tmux_condition window_bell_flag \
+    "$(window_helper $TMUX_STATUS_BELL_WINDOW_BG $TMUX_STATUS_BELL_WINDOW_FG)" \
+    "$(window_helper $TMUX_STATUS_WINDOW_BG $TMUX_STATUS_WINDOW_FG)"
+}
+
+function right_uptime() {
+  if [[ $(uname -s) == "Darwin" ]]; then
+    uptime | sed -E 's/  */ /g' | sed -E 's/.*(up .*), [[:digit:]]+ user.*/\1/'
+  else
+    awk '{
+      if ($1 >= 86400) { v = $1 / 86400; u = "d" }
+      else if ($1 >= 3600) { v = $1 / 3600; u = "h" }
+      else { v = $1 / 60; u = "min" }
+      printf("↑ %.1f%s", v, u)}' /proc/uptime
+  fi
+}
+
+
+function right_ram() {
+  if type free > /dev/null 2>&1; then
+    free -m | awk 'NR==2{printf "%.1f/%.1fG", $3/1024,$2/1024 }'
+  elif type vm_stat > /dev/null 2>&1; then
+    page_size=$(sysctl -nq vm.pagesize)
+    total=$(sysctl -nq hw.memsize)
+    vm_stat | awk -v page_size=$page_size -v total=$total -F ':' '$1 ~ /Pages active|Pages wired/ {used+=$2} END{printf "Mem: %.1f/%.1f GB", used*page_size/1024/1024/1024, total/1024/1024/1024}'
+  fi
+}
+
+# Initialized in right(), updated in right_add_segment().
+prev_bg=
+right_status=
+# right_add_segment bg text
+function right_add_segment() {
+  bg=$1
+  text="${@:2}"
+  if [[ $prev_bg == "$bg" ]]; then
+    right_status+="#[fg=$TMUX_STATUS_SOFT_SEP_FG,bg=$bg]$SOFT_LSEP"
+  else
+    right_status+="#[fg=$bg,bg=$prev_bg]$LSEP"
+  fi
+  right_status+="#[bg=$bg] $text "
+  prev_bg=$bg
+}
+
+function right() {
+  prev_bg=$TMUX_STATUS_BG
+  right_status=""
+
+  right_add_segment $TMUX_STATUS_WINDOW_BG "#[fg=white]$(right_ram)"
+  right_add_segment $TMUX_STATUS_WINDOW_BG "#[fg=white]$(right_uptime)"
+  #right_add_segment $TMUX_STATUS_WINDOW_BG "#[fg=white]$(date '+%a %b %d %r')"
+
+  echo $right_status
+}
+
+case "$1" in
+  left)
+    left
+    ;;
+  right)
+    right
+    ;;
+  window)
+    window
+    ;;
+  current-window)
+    current_window
+    ;;
+  test)
+    test
+    ;;
+  *)
+    echo "unknown status field: $1"
+    exit 1
+esac
+
+# arbitrary testing code
+function test() {
+  echo normal window: $(window)
+  echo
+  echo $(hostname_bg)
+  echo
+  echo left: $(left)
+}

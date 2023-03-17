@@ -1,0 +1,33 @@
+{
+  "tools": {
+    "symlink": {
+      "src_root" : "~/dotfiles",
+      "dest_root" : "~",
+      "backup_dir" : "/tmp/backup"
+    }
+  },
+  "packages": {
+    "brew": [
+      { "package" : "neovim" },
+      { "package" : "homebrew/cask-fonts/font-iosevka-ss14" },
+      { "package" : "homebrew/cask-fonts/font-symbols-only-nerd-font" },
+      { "package" : "fzf" },
+      { "package" : "ripgrep" },
+      { "package" : "nodejs" }
+    ],
+    "symlink": [
+      { "src" : "config/fish", "dest" : ".config/fish" },
+      { "src" : "config/kitty", "dest" : ".config/kitty" },
+      { "src" : "config/tmux", "dest" : ".config/tmux" },
+      { "src" : "config/wezterm", "dest" : ".config/wezterm" },
+      { "src" : "tmux.conf", "dest": ".tmux.conf" }
+    ],
+    "git": [
+      { "repo": "https://github.com/jamesjjx/nvim.git", "dir": "~/.config/nvim" },
+      { "repo": "https://github.com/tmux-plugins/tpm", "dir": "~/.tmux/plugins/tpm" }
+    ],
+    "cmd" : [
+      { "cmd" : "nvim +qall" }
+    ]
+  }
+}

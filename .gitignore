@@ -1,0 +1,6 @@
+config/fish/profile.fish
+config/fish/fish_variables
+config/powerline/*/*pyc
+config/powerline/segments/__pycache__/*
+.*
+!/.gitignore
