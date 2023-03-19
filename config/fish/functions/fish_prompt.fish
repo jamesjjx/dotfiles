@@ -1,9 +1,9 @@
 function fish_prompt
   set -l last_status $status
 
-  set_color normal
-  echo -n (prompt_pwd)
-  echo -n ' $ '
+  echo -n (prompt_login)
+  echo -n ':'
+  echo -n (set_color $fish_color_cwd)(prompt_pwd)
 
   # status
   echo -n -s '  '
@@ -20,5 +20,5 @@ function fish_prompt
   end
 
   echo
-  set_color $fish_color_comment; echo -n '><> '; set_color normal
+  set_color normal; echo -n '$ '; set_color normal
 end

@@ -1,3 +1,5 @@
+set -U fish_user_paths ~/.local/bin
+
 # color scheme
 #base16-zenburn
 source ~/.config/fish/nord.fish
