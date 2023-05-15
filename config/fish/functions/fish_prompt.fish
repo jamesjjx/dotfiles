@@ -1,24 +1,32 @@
+# Lots of examples at: https://github.com/fish-shell/fish-shell/tree/master/share/tools/web_config/sample_prompts
+# Can use `fish_config prompt show` to see quick demos.
 function fish_prompt
   set -l last_status $status
+  set -l normal (set_color normal)
+  set -l status_color (set_color brgreen)
+  set -l cwd_color (set_color $fish_color_cwd)
+  set -l vcs_color (set_color brpurple)
+  set -l prompt_status ""
 
-  echo -n (prompt_login)
-  echo -n ':'
-  echo -n (set_color $fish_color_cwd)(prompt_pwd)
+  # Since we display the prompt on a new line allow the directory names to be longer.
+  set -q fish_prompt_pwd_dir_length
+  or set -lx fish_prompt_pwd_dir_length 0
 
-  # status
-  echo -n -s '  '
-  if test $CMD_DURATION
-    # Show duration of the last command in seconds
-    set -l duration (math $CMD_DURATION / 1000)s
-    set -l time (date +%k:%M:%S)
-    if test $last_status -eq 0
-      echo -n (set_color green) $duration "($last_status)"
-    else
-      echo -n (set_color red) $duration "($last_status)"
-    end
-      echo -n (set_color $fish_color_comment) " $time"
+  # Color the prompt differently when we're root
+  set -l suffix '❯'
+  if functions -q fish_is_root_user; and fish_is_root_user
+      if set -q fish_color_cwd_root
+          set cwd_color (set_color $fish_color_cwd_root)
+      end
+      set suffix '#'
   end
 
-  echo
-  set_color normal; echo -n '$ '; set_color normal
+  # Color the prompt in red on error
+  if test $last_status -ne 0
+    set status_color (set_color $fish_color_error)
+  end
+  set prompt_status $status_color "[" $last_status ":" (math $CMD_DURATION/1000)s "]" $normal
+
+  echo -s (date "+%H:%M:%S") ' ' (prompt_login) ' ' $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal ' ' $prompt_status
+  echo -n -s $status_color $suffix ' ' $normal
 end
