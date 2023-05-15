@@ -5,8 +5,35 @@ function fish_prompt
   set -l normal (set_color normal)
   set -l status_color (set_color brgreen)
   set -l cwd_color (set_color $fish_color_cwd)
-  set -l vcs_color (set_color brpurple)
   set -l prompt_status ""
+  
+  if not set -q __fish_git_prompt_show_informative_status
+      set -g __fish_git_prompt_show_informative_status 1
+  end
+  if not set -q __fish_git_prompt_hide_untrackedfiles
+      set -g __fish_git_prompt_hide_untrackedfiles 1
+  end
+  if not set -q __fish_git_prompt_color_branch
+      set -g __fish_git_prompt_color_branch magenta --bold
+  end
+  if not set -q __fish_git_prompt_showupstream
+      set -g __fish_git_prompt_showupstream informative
+  end
+  if not set -q __fish_git_prompt_color_dirtystate
+      set -g __fish_git_prompt_color_dirtystate blue
+  end
+  if not set -q __fish_git_prompt_color_stagedstate
+      set -g __fish_git_prompt_color_stagedstate yellow
+  end
+  if not set -q __fish_git_prompt_color_invalidstate
+      set -g __fish_git_prompt_color_invalidstate red
+  end
+  if not set -q __fish_git_prompt_color_untrackedfiles
+      set -g __fish_git_prompt_color_untrackedfiles $fish_color_normal
+  end
+  if not set -q __fish_git_prompt_color_cleanstate
+      set -g __fish_git_prompt_color_cleanstate green --bold
+  end
 
   # Since we display the prompt on a new line allow the directory names to be longer.
   set -q fish_prompt_pwd_dir_length
@@ -25,8 +52,8 @@ function fish_prompt
   if test $last_status -ne 0
     set status_color (set_color $fish_color_error)
   end
-  set prompt_status $status_color "[" $last_status ":" (math $CMD_DURATION/1000)s "]" $normal
+  set prompt_status $status_color (math $CMD_DURATION/1000)s " (" $last_status  ")" $normal
 
-  echo -s (date "+%H:%M:%S") ' ' (prompt_login) ' ' $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal ' ' $prompt_status
+  echo -s (prompt_login) ' ' $cwd_color (prompt_pwd) (fish_vcs_prompt) $normal ' ' $prompt_status ' ' (date "+%H:%M:%S")
   echo -n -s $status_color $suffix ' ' $normal
 end
