@@ -18,7 +18,11 @@
       { "src" : "tmux.conf", "dest": ".tmux.conf" }
     ],
     "git": [
+      { "repo": "https://github.com/jamesjjx/nvim.git", "dir": "~/.config/nvim" },
       { "repo": "https://github.com/tmux-plugins/tpm", "dir": "~/.tmux/plugins/tpm" }
+    ],
+    "cmd" : [
+      { "cmd" : "nvim +qall" }
     ]
   }
 }
