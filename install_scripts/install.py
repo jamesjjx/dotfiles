@@ -110,7 +110,8 @@ class SymlinkInstaller(Installer):
         return
       else:
         Info("Moving %s to: %s" % (dest, self.backup_dir))
-        os.renames(dest, os.path.join(self.backup_dir, os.path.basename(dest)))
+        os.makedirs(self.backup_dir, exist_ok=True)
+        shutil.move(dest, os.path.join(self.backup_dir, os.path.basename(dest)))
     if os.path.lexists(dest):
       # Remove broken symlink.
       # For a broken symlink, exists() returns False and lexists() returns False.

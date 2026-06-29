@@ -13,6 +13,7 @@
       { "package" : "tmux" }
     ],
     "symlink": [
+      { "src" : "config/fish", "dest" : ".config/fish" },
       { "src" : "config/tmux", "dest" : ".config/tmux" },
       { "src" : "tmux.conf", "dest": ".tmux.conf" }
     ],

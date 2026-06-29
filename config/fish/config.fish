@@ -1,4 +1,4 @@
-set -U fish_user_paths ~/.local/bin
+fish_add_path ~/.local/bin
 
 # color scheme
 #base16-zenburn
