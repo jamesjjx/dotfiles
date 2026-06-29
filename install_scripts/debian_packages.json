@@ -8,7 +8,6 @@
   },
   "packages": {
     "apt": [
-      { "package" : "neovim" },
       { "package" : "fzf" },
       { "package" : "ripgrep" },
       { "package" : "tmux" }
@@ -22,7 +21,7 @@
       { "repo": "https://github.com/tmux-plugins/tpm", "dir": "~/.tmux/plugins/tpm" }
     ],
     "cmd" : [
-      { "cmd" : "nvim +qall" }
+      { "cmd" : "~/dotfiles/install_scripts/install_neovim.sh" }
     ]
   }
 }
