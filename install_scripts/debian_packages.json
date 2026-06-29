@@ -1,0 +1,24 @@
+{
+  "tools": {
+    "symlink": {
+      "src_root" : "~/dotfiles",
+      "dest_root" : "~",
+      "backup_dir" : "/tmp/backup"
+    }
+  },
+  "packages": {
+    "apt": [
+      { "package" : "neovim" },
+      { "package" : "fzf" },
+      { "package" : "ripgrep" },
+      { "package" : "tmux" }
+    ],
+    "symlink": [
+      { "src" : "config/tmux", "dest" : ".config/tmux" },
+      { "src" : "tmux.conf", "dest": ".tmux.conf" }
+    ],
+    "git": [
+      { "repo": "https://github.com/tmux-plugins/tpm", "dir": "~/.tmux/plugins/tpm" }
+    ]
+  }
+}

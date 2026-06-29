@@ -3,6 +3,7 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -29,13 +30,26 @@ class AptInstaller(Installer):
     result = subprocess.run(
         ['dpkg-query', '-W', "-f=${Version}", pkg], capture_output=True)
     if result.returncode == 0:
-      Info(pkg, 'already installed. Installed version:', result.stdout)
+      Info(pkg, 'already installed. Installed version:', result.stdout.decode().strip())
     else:
       repo = package_config.get('repo', '')
       if repo:
-        subprocess.check_call(['sudo', 'glinux-add-repo', repo])
-        subprocess.check_call(['sudo', 'apt', 'update'])
-      subprocess.check_call(['sudo', 'apt', 'install', pkg])
+        if shutil.which('glinux-add-repo'):
+          subprocess.check_call(['sudo', 'glinux-add-repo', repo])
+        elif shutil.which('add-apt-repository'):
+          subprocess.check_call(['sudo', 'add-apt-repository', '-y', repo])
+        else:
+          if repo.startswith('deb ') or repo.startswith('deb-src '):
+            sources_file = '/etc/apt/sources.list.d/extra_repos.list'
+            cmd = f"sudo touch {sources_file} && grep -Fxq '{repo}' {sources_file} || echo '{repo}' | sudo tee -a {sources_file}"
+            subprocess.check_call(['bash', '-c', cmd])
+          else:
+            Info("add-apt-repository not found. Installing software-properties-common...")
+            subprocess.check_call(['sudo', 'apt-get', 'update'])
+            subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'software-properties-common'])
+            subprocess.check_call(['sudo', 'add-apt-repository', '-y', repo])
+        subprocess.check_call(['sudo', 'apt-get', 'update'])
+      subprocess.check_call(['sudo', 'apt-get', 'install', '-y', pkg])
 
 
 class BrewInstaller(Installer):
